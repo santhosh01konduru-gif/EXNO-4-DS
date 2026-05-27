@@ -24,6 +24,116 @@ The feature selection techniques used are:
 3.Embedded Method
 
 # CODING AND OUTPUT:
-       # INCLUDE YOUR CODING AND OUTPUT SCREENSHOTS HERE
+
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
+df = pd.read_csv("bmi.csv")  
+print("Original Dataset:")
+print(df.head())
+
+<img width="352" height="166" alt="image" src="https://github.com/user-attachments/assets/4fc0cb80-51cb-4080-a048-bea1181bee8c" />
+
+df = df.dropna()
+df_std = df.copy()
+scaler_std = StandardScaler()
+df_std[['Height', 'Weight']] = scaler_std.fit_transform(df_std[['Height', 'Weight']])
+print("\nStandard Scaled Data:")
+print(df_std.head())
+
+<img width="451" height="188" alt="image" src="https://github.com/user-attachments/assets/cd25e231-262e-465e-a8c5-40d80734a22c" />
+
+
+df_minmax = df.copy()
+scaler_minmax = MinMaxScaler()
+df_minmax[['Height', 'Weight']] = scaler_minmax.fit_transform(df_minmax[['Height', 'Weight']])
+
+print("\nMin-Max Scaled Data:")
+print(df_minmax.head())
+
+<img width="402" height="177" alt="image" src="https://github.com/user-attachments/assets/8811ab1b-c6c2-4136-b5ef-0590fa03704c" />
+
+df_maxabs = df.copy()
+scaler_maxabs = MaxAbsScaler()
+df_maxabs[['Height', 'Weight']] = scaler_maxabs.fit_transform(df_maxabs[['Height', 'Weight']])
+print("\nMaxAbs Scaled Data:")
+print(df_maxabs.head())
+
+<img width="402" height="182" alt="image" src="https://github.com/user-attachments/assets/cedd95f4-132f-4dd6-af6d-a54353b64ba2" />
+
+df_robust = df.copy()
+scaler_robust = RobustScaler()
+df_robust[['Height', 'Weight']] = scaler_robust.fit_transform(df_robust[['Height', 'Weight']])
+
+print("\nRobust Scaled Data:")
+print(df_robust.head())
+print("\nFeature Scaling Completed Successfully.")
+
+<img width="442" height="217" alt="image" src="https://github.com/user-attachments/assets/a00e1eae-fc03-4339-b190-7cadfd22184f" />
+
+import numpy as np
+import pandas as pd
+from sklearn.feature_selection import SelectKBest, chi2, f_classif, RFE, SelectFromModel
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import accuracy_score
+df = pd.read_csv("income(1) (1).csv")
+print("Dataset Preview:")
+print(df.head())
+
+<img width="782" height="465" alt="image" src="https://github.com/user-attachments/assets/57d1c8c9-32dc-4cbf-9e05-fd3bb097ba7b" />
+
+categorical_columns = ['JobType', 'EdType', 'maritalstatus', 'occupation',
+                       'relationship', 'race', 'gender', 'nativecountry']
+
+df[categorical_columns] = df[categorical_columns].astype('category').apply(lambda x: x.cat.codes)
+if df['SalStat'].dtype == 'object':
+    df['SalStat'] = df['SalStat'].astype('category').cat.codes
+X = df.drop(columns=['SalStat'])
+y = df['SalStat']
+
+scaler = MinMaxScaler()
+X_scaled = scaler.fit_transform(X)
+
+selector_chi2 = SelectKBest(score_func=chi2, k=6)
+selector_chi2.fit(X_scaled, y)
+selected_features_chi2 = X.columns[selector_chi2.get_support()]
+print("\nChi-Square Selected:", list(selected_features_chi2))
+
+selector_anova = SelectKBest(score_func=f_classif, k=5)
+selector_anova.fit(X, y)
+selected_features_anova = X.columns[selector_anova.get_support()]
+print("\nANOVA Selected:", list(selected_features_anova))
+
+logreg = LogisticRegression(max_iter=1000)
+rfe = RFE(estimator=logreg, n_features_to_select=6)
+rfe.fit(X, y)
+selected_features_rfe = X.columns[rfe.support_]
+print("\nRFE Selected:", list(selected_features_rfe))
+
+<img width="1003" height="102" alt="image" src="https://github.com/user-attachments/assets/9df49daa-a8c4-4959-94c8-20a948af4463" />
+
+<img width="902" height="47" alt="image" src="https://github.com/user-attachments/assets/c2e5e555-f676-44cb-be8a-986e24c019b6" />
+
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X, y)
+embedded_selector = SelectFromModel(model, threshold='median')
+embedded_selector.fit(X, y)
+selected_features_embedded = X.columns[embedded_selector.get_support()]
+print("\nEmbedded Method Selected:", list(selected_features_embedded))
+X_train, X_test, y_train, y_test = train_test_split(
+    X[selected_features_embedded], y,
+    test_size=0.2,
+    random_state=42
+)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print("\nModel Accuracy (Embedded Method):", accuracy)
+
+<img width="1056" height="95" alt="image" src="https://github.com/user-attachments/assets/bdc4850c-5dd7-4b1c-a922-d1264ff7f716" />
+
 # RESULT:
-       # INCLUDE YOUR RESULT HERE
+Thus perform Feature Scaling and Feature Selection process and save the data to a file successfully.
